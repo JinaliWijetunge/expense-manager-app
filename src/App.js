@@ -1,24 +1,27 @@
-import logo from './logo.svg';
 import './App.css';
+import { Router, Route, Switch } from 'react-router-dom';
+import routes from './routes';
+import history from './_helpers/history'
+import 'antd/dist/antd.css';
+import 'react-table-v6/react-table.css'
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router history={history} >
+    <Switch>
+      {routes.map(
+        (route, index) => (
+          <Route
+            key={index}
+            exact={route.exact}
+            path={route.path}
+            component={route.layout(route.component)} />
+        )
+      )}
+      
+      {/* <Redirect from="/" to="/" /> */}
+    </Switch>
+  </Router>
   );
 }
 
