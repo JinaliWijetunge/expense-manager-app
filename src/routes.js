@@ -5,6 +5,7 @@ import AllBudget from "./views/Budget/AllBudget";
 import AllCategories from "./views/Categories/AllCategories";
 import HomeView from "./views/Home/HomeView";
 import Login from "./views/Login/Login";
+import Registration from "./views/Login/Registration";
 import AllTransactions from "./views/Transaction/AllTransactions";
 
 const routes = [
@@ -37,6 +38,12 @@ const routes = [
         exact: true,
         layout: LoginLayout,
         component: Login,
+    },
+    {
+        path: `/registration`,
+        exact: true,
+        layout: LoginLayout,
+        component: Registration,
     }
 ]
 

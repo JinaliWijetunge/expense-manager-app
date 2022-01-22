@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 
-import { Form, Input, Button, Checkbox } from "antd";
+import { Form, Input, Button, Checkbox, Alert } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import "./home.css";
 
 import loginicon from "./loginicon.svg";
+import Endpoints from "../../services/Endpoints";
+import history from "../../_helpers/history";
+import HTTPClient from "../../services/HTTPClient";
 
 const antIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#fff" }} spin />
@@ -18,22 +21,15 @@ const Login = props => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [loading, setLoading] = useState(false)
 
 
   const validate = () => {
     let isValid = true;
     if (email == null) {
       isValid = false;
-      setEmailError("Email is a required field.");
-    } else if (
-      !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
-        email
-      )
-    ) {
-      isValid = false;
-      setEmailError("Email format is invalid.");
+      setEmailError("Username is a required field.");
     }
-
     if (password == null) {
       isValid = false;
       setPasswordError("Password is a required field");
@@ -42,6 +38,24 @@ const Login = props => {
     return isValid;
   };
 
+  const doLogin = () => {
+    setLoading(true)
+    setLoginError("");
+
+    HTTPClient.Get(`${Endpoints.LOGIN}/${email}/${password}`)
+      .then(data => {
+        console.log(data);
+        setLoading(false)
+        history.push("/")
+
+      }).catch(error => {
+
+        console.log(error.msg)
+        setLoginError(error.msg)
+        setLoading(false)
+      })
+  }
+
   return (
     <div className="login-main-container">
       <h3 className="logo-title"> Expense Tracker </h3>
@@ -49,7 +63,7 @@ const Login = props => {
         <div className="form-icon">
           <img src={loginicon} alt="login icon"></img>
         </div>
-        <h4>{Login}</h4>
+        <h4>Login</h4>
       </div>
       <div className="login-main-form">
         <Form
@@ -60,7 +74,6 @@ const Login = props => {
         >
           <Form.Item
             name="username"
-          // rules={[{ required: true, message: 'Please input your Username!' }]}
           >
             <Input
               prefix={
@@ -82,7 +95,7 @@ const Login = props => {
           </Form.Item>
           <Form.Item
             name="password"
-          // rules={[{ required: true, message: 'Please input your Password!' }]}
+
           >
             <Input
               prefix={
@@ -99,44 +112,43 @@ const Login = props => {
                 setLoginError("");
               }}
             />
-            <div style={{ height: 20 }}>
+            <div style={{ marginTop: 20 }}>
               <span style={{ color: "red" }}>{passwordError}</span>
             </div>
           </Form.Item>
           <div className="remember-me-container">
-            {/* <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox>{t('loginPage.rememberMe')}</Checkbox>
-            </Form.Item> */}
+
             <Form.Item>
-              <a className="login-form-forgot" href="/forgot-password">
-                Forgot Password
+              <a className="login-form-forgot" href="/registration">
+                New User? Create an Account
               </a>
+            </Form.Item>
+            <Form.Item>
+              <div className="form-button">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="login-form-button"
+                  onClick={() => {
+                    if (validate()) {
+                      doLogin();
+
+                    }
+                  }}
+                >
+                  <span style={{ paddingRight: '20px' }}>Login</span>
+                  {loading && (
+                    <Spin indicator={antIcon} />
+                  )}
+                </Button>
+              </div>
+              {loginError && <div style={{ marginTop: "20px" }}>
+                <Alert message={loginError} type="error" />
+
+              </div>}
             </Form.Item>
           </div>
 
-          <Form.Item>
-            <div className="form-button">
-              <Button
-                type="primary"
-                htmlType="submit"
-                className="login-form-button"
-                onClick={() => {
-                  if (validate()) {
-                    setLoginError("");
-                    // props.authInstitute(email, password);
-                  }
-                }}
-              >
-                <span style={{ paddingRight: '20px' }}>Login</span>
-                {props.login && props.login.authInstituteLoading && (
-                  <Spin indicator={antIcon} />
-                )}
-              </Button>
-            </div>
-            <div style={{ height: 20 }}>
-              <span style={{ color: "red" }}>{loginError}</span>
-            </div>
-          </Form.Item>
         </Form>
       </div>
     </div>
