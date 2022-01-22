@@ -45,6 +45,7 @@ const Login = props => {
     HTTPClient.Get(`${Endpoints.LOGIN}/${email}/${password}`)
       .then(data => {
         console.log(data);
+        localStorage.setItem("username", email)
         setLoading(false)
         history.push("/")
 
@@ -142,14 +143,16 @@ const Login = props => {
                   )}
                 </Button>
               </div>
-              {loginError && <div style={{ marginTop: "20px" }}>
-                <Alert message={loginError} type="error" />
 
-              </div>}
             </Form.Item>
+
           </div>
 
         </Form>
+        {loginError && <div style={{ marginTop: "20px" }}>
+          <Alert message={loginError} type="error" />
+
+        </div>}
       </div>
     </div>
   );
