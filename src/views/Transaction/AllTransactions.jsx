@@ -96,6 +96,14 @@ function AllTransactions() {
                         >
                             <DatePicker onChange={onChange} picker="month" placeholder="Select a month" />
                         </Form.Item>
+                        <Form.Item
+                            label="Category"
+                            name="category"
+                            rules={[{ required: true, message: 'Required Field' }]}
+                        >
+                            <Select placeholder="Select a category"/>
+                        </Form.Item>
+
                         <Form.Item style={{ display: 'flex', justifyContent: 'end' }}>
                             <Button type="primary" className="go-button" htmlType="submit">
                                 Get transactions for the month
