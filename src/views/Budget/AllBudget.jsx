@@ -49,7 +49,7 @@ function AllBudget() {
         HTTPClient.Get(`${Endpoints.GET_ALL_CATEGORIES}/${username}`)
             .then(data => {
                 console.log(data);
-                setCategories([...allCategories,...data.data.object])
+                setCategories([...allCategories, ...data.data.object])
                 setLoading(false)
 
 
@@ -279,6 +279,9 @@ function AllBudget() {
                         layout="vertical"
                         onFinish={onFinish}
                         style={{ marginTop: "5px" }}
+                        initialValues={{
+                            "recurring": "none"
+                        }}
 
                     >
                         <Form.Item
@@ -332,7 +335,10 @@ function AllBudget() {
                         // rules={[{ required: true, message: 'Required Field' }]}
                         >
                             <Select placeholder="Select Recurring" >
-                                <Option value="monthly">Monthly</Option>
+                                <Option value="none">None</Option>
+                                <Option value="minute">Every Minute</Option>
+                                <Option value="weekly">Every Week</Option>
+                                <Option value="monthly">Every Month</Option>
                             </Select>
                         </Form.Item>
 

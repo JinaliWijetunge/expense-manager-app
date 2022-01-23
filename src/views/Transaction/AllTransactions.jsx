@@ -328,6 +328,9 @@ function AllTransactions() {
                         layout="vertical"
                         onFinish={onFinish}
                         style={{ marginTop: "5px" }}
+                        initialValues={{
+                            "recurring": "none"
+                        }}
 
                     >
                         <Form.Item
@@ -380,9 +383,12 @@ function AllTransactions() {
                             name="recurring"
                             // rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <Select placeholder="Select Recurring" >
-                                <Option value="monthly">Monthly</Option>
-                            </Select>
+                           <Select placeholder="Select Recurring" >
+                        <Option value="none">None</Option>
+                        <Option value="minute">Every Minute</Option>
+                        <Option value="weekly">Every Week</Option>
+                        <Option value="monthly">Every Month</Option>
+                    </Select>
                         </Form.Item>
                         <Form.Item style={{ display: 'flex', justifyContent: 'end' }}>
                             <Button type="primary" htmlType="submit" className='go-button'>

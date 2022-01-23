@@ -40,10 +40,10 @@ class BarChartView extends React.Component {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar   dataKey="totalBudget" fill="#8884d8" isAnimationActive={false}>
+                        <Bar  name='Budget' dataKey="totalBudget" fill="#8884d8" isAnimationActive={false}>
                             {/* <LabelList dataKey="uv"  /> */}
                         </Bar>
-                        <Bar name={this.props.name }  dataKey="totalExpense" fill="#0000ff" isAnimationActive={false}>
+                        <Bar name={"Expense" }  dataKey="totalExpense" fill="#0000ff" isAnimationActive={false}>
                             {/* <LabelList dataKey="pv"  /> */}
                         </Bar>
                     </BarChart>

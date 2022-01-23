@@ -11,7 +11,7 @@ const EditTransaction = ({ title, allCategories, isModalVisible, handleCancel, o
         >
             <div className="nic-parent" style={{ display: 'grid', color: "#00abc5 " }} >
                 <div type="primary"  >
-                  {isTranaction?  "Edit Transaction": "Edit Budget"}
+                    {isTranaction ? "Edit Transaction" : "Edit Budget"}
                 </div>
             </div>
             {initialValues && <Form
@@ -41,7 +41,7 @@ const EditTransaction = ({ title, allCategories, isModalVisible, handleCancel, o
                         })}
                     </Select>
                 </Form.Item>
-                {isTranaction &&<Form.Item
+                {isTranaction && <Form.Item
                     label="Transaction Type"
                     name="type"
                     rules={[{ required: true, message: 'Required Field' }]}
@@ -55,24 +55,27 @@ const EditTransaction = ({ title, allCategories, isModalVisible, handleCancel, o
                 <Form.Item
                     label="Amount (LKR)"
                     name="amount"
-                    rules={[{ required: true, message: 'Required Field' },{pattern: /^\d+$/, message: "Invalid format"}]}
+                    rules={[{ required: true, message: 'Required Field' }, { pattern: /^\d+$/, message: "Invalid format" }]}
                 >
                     <Input />
                 </Form.Item>
                 <Form.Item
                     label="Notes"
                     name="note"
-                    // rules={[{ required: true, message: 'Required Field' }]}
+                // rules={[{ required: true, message: 'Required Field' }]}
                 >
                     <Input.TextArea />
                 </Form.Item>
                 <Form.Item
                     label="Recurring"
                     name="recurring"
-                    // rules={[{ required: true, message: 'Required Field' }]}
+                // rules={[{ required: true, message: 'Required Field' }]}
                 >
                     <Select placeholder="Select Recurring" >
-                        <Option value="monthly">Monthly</Option>
+                        <Option value="none">None</Option>
+                        <Option value="minute">Every Minute</Option>
+                        <Option value="weekly">Every Week</Option>
+                        <Option value="monthly">Every Month</Option>
                     </Select>
                 </Form.Item>
                 <Form.Item style={{ display: 'flex', justifyContent: 'end' }}>
