@@ -9,6 +9,7 @@ import { DeleteFilled, EditFilled } from '@ant-design/icons';
 import ModalConfirm from '../../components/modals/ModalConfirm';
 import EditTransaction from '../../components/modals/EditTransaction';
 import moment from 'moment';
+import { presetCategories } from '../../_helpers/constansts';
 
 const { Option } = Select
 
@@ -22,7 +23,7 @@ function AllBudget() {
     const [username, setUsername] = useState(localStorage.username)
     const [loading, setLoading] = useState(false)
     const [allBudget, setAllBudget] = useState();
-    const [allCategories, setCategories] = useState([])
+    const [allCategories, setCategories] = useState(presetCategories)
     const [addBudget, setAddBudget] = useState()
     const [addBudgetFailed, setAddBudgetFailed] = useState()
     const [month, setMonth] = useState(`${day}-${monthVal}`)
@@ -48,7 +49,7 @@ function AllBudget() {
         HTTPClient.Get(`${Endpoints.GET_ALL_CATEGORIES}/${username}`)
             .then(data => {
                 console.log(data);
-                setCategories(data.data.object)
+                setCategories([...allCategories,...data.data.object])
                 setLoading(false)
 
 

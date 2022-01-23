@@ -9,6 +9,7 @@ import HTTPClient from '../../services/HTTPClient';
 import Loader from '../../components/loader/Loader';
 import { validArray } from '../../_helpers/utilityFunctions';
 import moment from 'moment';
+import { presetCategories } from '../../_helpers/constansts';
 
 const { Option } = Select
 
@@ -25,7 +26,7 @@ function AllTransactions() {
     const [month, setMonth] = useState(`${day}-${monthVal}`)
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [selectedType, setSelectedType] = useState("all")
-    const [allCategories, setCategories] = useState([])
+    const [allCategories, setCategories] = useState(presetCategories)
     const [allTransactions, setAllTransactions] = useState()
     const [addTransaction, setAddTransaction] = useState()
     const [addTransactionFailed, setAddTransactionFailed] = useState()
@@ -50,7 +51,7 @@ function AllTransactions() {
         HTTPClient.Get(`${Endpoints.GET_ALL_CATEGORIES}/${username}`)
             .then(data => {
                 console.log(data);
-                setCategories(data.data.object)
+                setCategories([...allCategories,...data.data.object])
                 setLoading(false)
 
 

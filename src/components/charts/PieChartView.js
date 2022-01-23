@@ -2,7 +2,7 @@ import React from 'react'
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { validArray } from '../../_helpers/utilityFunctions';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = [ '#00C49F', '#FF8042'];
 class PieChartView extends React.Component {
     
     render() {
@@ -30,7 +30,7 @@ class PieChartView extends React.Component {
                     <div>
                     {validArray(this.props.pieChartData) && this.props.pieChartData.map((entry, index) => <>
                         <span class="dot" style={{ height: "10px", width: '10px', backgroundColor: COLORS[index % COLORS.length], borderRadius: "50%", display: 'inline-block' }}> </span>
-                        <span className="legend-lable">{" " + this.props.pieChartData[index].name} - {this.props.pieChartData[index].value}</span>
+                        <span className="legend-lable">{" " + this.props.pieChartData[index].name} - {this.props.pieChartData[index].value} (LKR)</span>
                         <br /></>)}
                     </div>
                 </div>

@@ -14,20 +14,23 @@ function HomeView() {
   const [loading, setLoading] = useState(false)
   const [username, setUsername] = useState(localStorage.username)
   const [chartData, setChartData] = useState([])
+  const [overallAmount, setOverallAmount] = useState()
   function onChange(date, dateString) {
     console.log(date, dateString);
     setDate(dateString)
     loadChart(dateString)
+    getOverAllAmount()
   }
 
   useEffect(() => {
-    loadChart(dateMonth)
+    getOverAllAmount()
+    loadChart()
 
   }, [])
 
-  const loadChart = (value) => {
+  const loadChart = () => {
     setLoading(true)
-    HTTPClient.Get(`${Endpoints.GET_ALL_CATEGORIES}/${username}/${value}`)
+    HTTPClient.Get(`${Endpoints.GET_ALL_BUDGET}/barchart/${username}/${dateMonth}`)
       .then(data => {
         console.log(data);
         setChartData(data.data.object)
@@ -41,6 +44,23 @@ function HomeView() {
 
   }
   
+  const getOverAllAmount = () => {
+    setLoading(true);
+
+    HTTPClient.Get(`${Endpoints.GET_ALL_BUDGET}/total/${username}/transaction/${dateMonth}`)
+        .then(data => {
+            console.log(data);
+            let array = [{name:"Incomes", value: data.data.object.totalIncome}, {name: "Expenses", value: data.data.object.totalExpenses}]
+            setOverallAmount(array)
+            setLoading(false)
+
+
+        }).catch(error => {
+            console.log(error.msg)
+            setLoading(false)
+
+        })
+}
   function disabledDate(current) {
     // Can not select days before today and today
     return current && current > moment().endOf('day');
@@ -58,7 +78,7 @@ function HomeView() {
         />
       </div>
       <div style={{ marginTop: "10px" }}>
-        <ChartContainer chartData={data} />
+        <ChartContainer chartData={overallAmount} barChartData={chartData}/>
       </div>
     </div>
   );

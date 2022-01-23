@@ -36,14 +36,14 @@ class BarChartView extends React.Component {
                         }}
                     >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" angle={-20} interval={0} minTickGap={-200} dy={15} dx={-5}/>
+                        <XAxis dataKey="categoryName" angle={-20} interval={0} minTickGap={-200} dy={15} dx={-5}/>
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar name={this.props.name}  dataKey="uv" fill="#8884d8" isAnimationActive={false}>
+                        <Bar   dataKey="totalBudget" fill="#8884d8" isAnimationActive={false}>
                             {/* <LabelList dataKey="uv"  /> */}
                         </Bar>
-                        <Bar name={this.props.name }  dataKey="pv" fill="#0000ff" isAnimationActive={false}>
+                        <Bar name={this.props.name }  dataKey="totalExpense" fill="#0000ff" isAnimationActive={false}>
                             {/* <LabelList dataKey="pv"  /> */}
                         </Bar>
                     </BarChart>

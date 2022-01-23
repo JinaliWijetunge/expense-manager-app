@@ -8,10 +8,11 @@ import HTTPClient from '../../services/HTTPClient';
 import { DeleteFilled, EditFilled } from '@ant-design/icons';
 import ModalConfirm from '../../components/modals/ModalConfirm';
 import EditCategory from '../../components/modals/EditCategory';
+import { presetCategories } from '../../_helpers/constansts';
 
 function AllCategories() {
     const [loading, setLoading] = useState(false)
-    const [allCategories, setCategories] = useState([])
+    const [allCategories, setCategories] = useState(presetCategories)
     const [username, setUsername] = useState(localStorage.username)
     const [createCategorySuccess, setCreateCategorySuccess] = useState()
     const [createCategoryFailed, setCreateCategoryFailed] = useState()
@@ -35,7 +36,7 @@ function AllCategories() {
         HTTPClient.Get(`${Endpoints.GET_ALL_CATEGORIES}/${username}`)
             .then(data => {
                 console.log(data);
-                setCategories(data.data.object)
+                setCategories([...allCategories,...data.data.object])
                 setLoading(false)
 
 
@@ -92,13 +93,14 @@ function AllCategories() {
         Header: "Action",
         accessor: "id",
         Cell: row => {
+            console.log(row)
             return (
                 <div className='table-action-column' style={{ display: "block" }}>
                     {/* <Button className='btn-table-edit' icon={<EditFilled color='#004ffc' />} onClick={() => {
                         console.log(row)
                         showModal(row.index);
                     }}></Button> */}
-                    <Button className='btn-table-delete' icon={<DeleteFilled />} onClick={() => onClickRemove(row.index)}></Button>
+                    <Button className='btn-table-delete' disabled={row.original.user==''} icon={<DeleteFilled />} onClick={() => onClickRemove(row.index)}></Button>
                 </div>
             )
         }
@@ -166,7 +168,18 @@ function AllCategories() {
                         <Form.Item
                             label="Category Name"
                             name="category_name"
-                            rules={[{ required: true, message: 'Required Field' }]}
+                            rules={[{ required: true, message: 'Required Field' }, 
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                   
+                                    if (allCategories.find(x => x.category_name == value)) {
+                                        return Promise.reject(new Error('Category already exists'));
+                                    }
+
+                                    return Promise.resolve();
+                                }
+                            })
+                        ]}
                         >
                             <Input />
                         </Form.Item>
