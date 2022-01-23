@@ -675,7 +675,7 @@ body{
 /* React Table CSSS */
 .ReactTable .rt-thead.-header {
   box-shadow: 0 2px 15px 0 rgb(0 0 0 / 15%);
-  background-color: #00abc5 !important;
+  background-color: #000 !important;
   color: #fff;
 }
 

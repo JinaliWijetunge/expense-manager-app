@@ -1,7 +1,7 @@
 import React from "react"
-import { Modal, Button, Divider, } from "antd";
+import { Modal, Button, Divider, Alert, } from "antd";
 
-const ModalConfirm = ({ title, body,isModalVisible, handleCancel,handleOk }) => {
+const ModalConfirm = ({ title, body,isModalVisible, handleCancel,handleOk, deleteSuccess, deleteFailed }) => {
     return (
         <Modal title={title} visible={isModalVisible} onCancel={handleCancel}
             footer={[
@@ -13,6 +13,8 @@ const ModalConfirm = ({ title, body,isModalVisible, handleCancel,handleOk }) => 
             ]}
         >
             <p>{body}</p>
+            {deleteSuccess && <Alert type="success" message={deleteSuccess}/>}
+           { deleteFailed && <Alert type="error" message={deleteFailed}/>}
         </Modal>
     )
 

@@ -1,13 +1,114 @@
-import React, { useState } from 'react';
-import { DatePicker, Button, Form, Input, Row, Col, Select } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { DatePicker, Button, Form, Input, Row, Col, Select, Alert } from 'antd';
 import ReactTable from 'react-table-v6'
+import Endpoints from '../../services/Endpoints';
+import HTTPClient from '../../services/HTTPClient';
+import Loader from '../../components/loader/Loader';
+import { validArray } from '../../_helpers/utilityFunctions';
+import { DeleteFilled, EditFilled } from '@ant-design/icons';
+import ModalConfirm from '../../components/modals/ModalConfirm';
+import EditTransaction from '../../components/modals/EditTransaction';
+
+const { Option } = Select
 
 function AllBudget() {
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [editModalVsibile, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
+    const [formEdit] = Form.useForm();
     const [formMonth] = Form.useForm();
+    const [username, setUsername] = useState(localStorage.username)
+    const [loading, setLoading] = useState(false)
+    const [allBudget, setAllBudget] = useState();
+    const [allCategories, setCategories] = useState([])
+    const [addBudget, setAddBudget] = useState()
+    const [addBudgetFailed, setAddBudgetFailed] = useState()
+    const [month, setMonth] = useState()
+    const [selectedCategory, setSelectedCategory] = useState()
+    const [isDeletModalVisible, setIsDeleteModalVisible] = useState(false)
+    const [selectedIndex, setIndex] = useState()
+    const [deleteSuccess, setDeleteSuccess] = useState()
+    const [deleteFailed, setDeleteFailed] = useState()
+    const [editTransaction, setEditTransaction] = useState()
+    const [editTransactionFailed, setEditTransactionFailed] = useState()
 
-    const showModal = () => {
+
+    useEffect(() => {
+        //get all categories
+        loadCategories()
+
+    }, [])
+
+    const loadCategories = () => {
+        setLoading(true);
+
+        HTTPClient.Get(`${Endpoints.GET_ALL_CATEGORIES}/${username}`)
+            .then(data => {
+                console.log(data);
+                setCategories(data.data.object)
+                setLoading(false)
+
+
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+            })
+
+    }
+
+
+    const loadBudget = (values) => {
+        debugger
+        setLoading(true);
+
+        HTTPClient.Get(`${Endpoints.GET_ALL_BUDGET}/${username}?payment_type=budget&&type=all&&category=${selectedCategory}&&date=${month}`)
+            .then(data => {
+                console.log(data);
+                setAllBudget(data.data.object)
+                setLoading(false)
+
+
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+                setAllBudget([])
+
+            })
+
+        setTimeout(() => {
+            setAddBudgetFailed(false)
+            setAddBudget(false)
+            form.resetFields();
+            setEditTransactionFailed(false)
+            setEditTransaction(false)
+            formEdit.resetFields();
+            setIsModalVisible(false)
+        }, 3000);
+    }
+    const onFinishEdit = (values) => {
+        setLoading(true)
+        setEditTransactionFailed(false)
+        setEditTransaction(false)
+        values.date = allBudget[selectedIndex].month
+        HTTPClient.Post(`${Endpoints.GET_ALL_BUDGET}/edit/${username}/budget/${allBudget[selectedIndex].id}`, values)
+            .then(data => {
+                console.log(data);
+                setEditTransaction(data.data.msg)
+                setLoading(false)
+                loadBudget()
+
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+                setEditTransactionFailed(error.msg)
+            })
+
+
+
+    }
+
+
+    const showModal = (index) => {
+        setIndex(index)
         setIsModalVisible(true);
     };
 
@@ -17,26 +118,98 @@ function AllBudget() {
 
     const handleCancel = () => {
         setIsModalVisible(false);
+        setIsDeleteModalVisible(false)
+        setEditTransactionFailed(false)
+        setEditTransaction(false)
+        formEdit.resetFields();
     };
     const onFinish = (values) => {
         console.log(values)
+        setLoading(true)
+        setAddBudgetFailed(false)
+        setAddBudget(false)
+        HTTPClient.Post(`${Endpoints.GET_ALL_BUDGET}/${username}/budget/${month}`, values)
+            .then(data => {
+                console.log(data);
+                setAddBudget(data.data.msg)
+                setLoading(false)
+                loadBudget()
 
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+                setAddBudgetFailed(error.msg)
+            })
 
 
     }
 
     const onChange = (date, dateString) => {
         console.log(date, dateString);
+        setMonth(dateString)
     }
+
+    const onClickRemove = (index) => {
+        setDeleteSuccess(false)
+        setDeleteFailed(false)
+        setIndex(index)
+        setIsDeleteModalVisible(true)
+    }
+    const handleDeleteOk = () => {
+        setLoading(true)
+        HTTPClient.Delete(`${Endpoints.GET_ALL_BUDGET}/delete/${username}/budget/${allBudget[selectedIndex].id}`)
+            .then(data => {
+                console.log(data);
+                setIsDeleteModalVisible(false)
+                setDeleteSuccess(data.data.msg)
+                setLoading(false)
+                loadBudget()
+
+            }).catch(error => {
+                console.log(error.msg)
+                setDeleteFailed(error.msg)
+                setLoading(false)
+            })
+
+    }
+
+    const columns = [{
+        Header: "Name",
+        accessor: "name"
+    },
+    {
+        Header: "Amount",
+        accessor: "amount"
+    },
+    {
+        Header: "Category",
+        accessor: "category"
+    },
+    {
+        Header: "Action",
+        accessor: "id",
+        Cell: row => {
+            return (
+                <div className='table-action-column' style={{ display: "block" }}>
+                    <Button className='btn-table-edit' icon={<EditFilled color='#004ffc' />} onClick={() => {
+                        console.log(row)
+                        showModal(row.index);
+                    }}></Button>
+                    <Button className='btn-table-delete' icon={<DeleteFilled />} onClick={() => onClickRemove(row.index)}></Button>
+                </div>
+            )
+        }
+    }]
 
     return (
         <div >
+            {loading && <Loader />}
             <div className="nic-parent" >
                 <Row>
                     <Form
                         form={formMonth}
                         layout="inline"
-                        onFinish={onFinish}
+                        onFinish={loadBudget}
                     >
                         <Form.Item
                             label="Month"
@@ -50,7 +223,12 @@ function AllBudget() {
                             name="category"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <Select placeholder="Select a category"/>
+                            <Select placeholder="Select a category" onChange={(value) => setSelectedCategory(value)}>
+                                <Option value="all">All</Option>
+                                {validArray(allCategories) && allCategories.map((ctgry, index) => {
+                                    return (<Option value={ctgry.category_name}>{ctgry.category_name}</Option>)
+                                })}
+                            </Select>
                         </Form.Item>
                         <Form.Item style={{ display: 'flex', justifyContent: 'end' }}>
                             <Button type="primary" className="go-button" htmlType="submit">
@@ -61,11 +239,11 @@ function AllBudget() {
                 </Row>
             </div>
 
-            <Row style={{ marginTop: "10px" }}>
+            {allBudget && <Row style={{ marginTop: "10px" }}>
                 <Col sm={24} md={18} lg={14} xl={14}>
                     <ReactTable
                         columns={columns}
-                        data={[]}
+                        data={allBudget}
                         defaultPageSize={5}
                         showPageSizeOptions={true}
                         style={{ marginTop: "5px" }}
@@ -89,7 +267,7 @@ function AllBudget() {
                     >
                         <Form.Item
                             label="Name"
-                            name="budgetName"
+                            name="name"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
                             <Input />
@@ -97,40 +275,81 @@ function AllBudget() {
                         <Form.Item
                             label="Category"
                             name="category"
-                            rules={[{ required: true, message: 'Required Field' }]}
+                            rules={[
+                                { required: true, message: 'Required Field' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (allBudget.find(x => x.category !== value)) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('A Budget already exists for the selected category!'));
+                                    }
+                                })]}
                         >
-                            <Select />
+
+                            <Select placeholder="Select a category" >
+                                {validArray(allCategories) && allCategories.map((ctgry, index) => {
+                                    return (<Option value={ctgry.category_name}>{ctgry.category_name}</Option>)
+                                })}
+                            </Select>
+
                         </Form.Item>
                         <Form.Item
                             label="Amount"
                             name="amount"
-                            rules={[{ required: true, message: 'Required Field' }]}
+                            rules={[{ required: true, message: 'Required Field' }, { pattern: /^\d+$/, message: "Invalid format" }]}
                         >
                             <Input />
                         </Form.Item>
+                        <Form.Item
+                            label="Notes"
+                            name="note"
+                            rules={[{ required: true, message: 'Required Field' }]}
+                        >
+                            <Input.TextArea />
+                        </Form.Item>
+                        <Form.Item
+                            label="Recurring"
+                            name="recurring"
+                            rules={[{ required: true, message: 'Required Field' }]}
+                        >
+                            <Select placeholder="Select Recurring" >
+                                <Option value="monthly">Monthly</Option>
+                            </Select>
+                        </Form.Item>
+
                         <Form.Item style={{ display: 'flex', justifyContent: 'end' }}>
                             <Button type="primary" htmlType="submit" className='go-button'>
                                 Submit
                             </Button>
                         </Form.Item>
                     </Form>
+                    {addBudget && <Alert type='success' message={addBudget} />}
+                    {addBudgetFailed && <Alert type='error' message={addBudgetFailed} />}
                 </Col>
-            </Row>
+            </Row>}
+            <ModalConfirm
+                title="Delet Message"
+                isModalVisible={isDeletModalVisible}
+                handleCancel={handleCancel}
+                handleOk={handleDeleteOk}
+                body={`Are you sure you want to remove this budget`}
+
+            />
+            <EditTransaction
+                isModalVisible={editModalVsibile}
+                handleCancel={handleCancel}
+                onFinish={onFinishEdit}
+                formEdit={formEdit}
+                initialValues={editModalVsibile && allBudget[selectedIndex]}
+                allCategories={allCategories}
+                editTransaction={editTransaction}
+                editTransactionFailed={editTransactionFailed}
+                isTranaction={false}
+            />
         </div>
     );
 }
 
 export default AllBudget;
 
-const columns = [{
-    Header: "Name",
-    accessor: "categoryName"
-},
-{
-    Header: "Amount",
-    accessor: "categoryName"
-},
-{
-    Header: "Category",
-    accessor: "categoryName"
-}]

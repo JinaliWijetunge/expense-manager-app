@@ -1,17 +1,65 @@
-import React, { useState } from 'react';
-import { DatePicker, Button, Form, Input, Row, Col, Select } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { DatePicker, Button, Form, Input, Row, Col, Select, Alert } from 'antd';
 import ReactTable from 'react-table-v6'
 import { DeleteFilled, EditFilled } from '@ant-design/icons';
 import ModalConfirm from '../../components/modals/ModalConfirm';
 import EditTransaction from '../../components/modals/EditTransaction';
+import Endpoints from '../../services/Endpoints';
+import HTTPClient from '../../services/HTTPClient';
+import Loader from '../../components/loader/Loader';
+import { validArray } from '../../_helpers/utilityFunctions';
+
+const { Option } = Select
+
 function AllTransactions() {
     const [editModalVsibile, setIsModalVisible] = useState(false);
     const [isDeletModalVisible, setIsDeleteModalVisible] = useState(false)
     const [form] = Form.useForm();
     const [formMonth] = Form.useForm();
     const [formEdit] = Form.useForm();
+    const [username, setUsername] = useState(localStorage.username)
+    const [loading, setLoading] = useState(false)
+    const [month, setMonth] = useState()
+    const [selectedCategory, setSelectedCategory] = useState()
+    const [selectedType, setSelectedType] = useState()
+    const [allCategories, setCategories] = useState([])
+    const [allTransactions, setAllTransactions] = useState()
+    const [addTransaction, setAddTransaction] = useState()
+    const [addTransactionFailed, setAddTransactionFailed] = useState()
+    const [selectedIndex, setIndex] = useState()
+    const [editTransaction, setEditTransaction] = useState()
+    const [editTransactionFailed, setEditTransactionFailed] = useState()
+    const [deleteSuccess, setDeleteSuccess] = useState()
+    const [deleteFailed, setDeleteFailed] = useState()
+    const [overallAmount, setOverallAmount] = useState()
 
-    const showModal = () => {
+
+    useEffect(() => {
+        //get all categories
+        loadCategories()
+
+    }, [])
+
+    const loadCategories = () => {
+        setLoading(true);
+
+        HTTPClient.Get(`${Endpoints.GET_ALL_CATEGORIES}/${username}`)
+            .then(data => {
+                console.log(data);
+                setCategories(data.data.object)
+                setLoading(false)
+
+
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+            })
+
+    }
+
+
+    const showModal = (index) => {
+        setIndex(index)
         setIsModalVisible(true);
     };
 
@@ -26,12 +74,41 @@ function AllTransactions() {
     const onFinish = (values) => {
         console.log(values)
 
+        setLoading(true)
+        setAddTransactionFailed(false)
+        setAddTransaction(false)
+        HTTPClient.Post(`${Endpoints.GET_ALL_BUDGET}/${username}/transaction/${month}`, values)
+            .then(data => {
+                console.log(data);
+                setAddTransaction(data.data.msg)
+                setLoading(false)
+                loadTransactions()
 
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+                setAddTransactionFailed(error.msg)
+            })
 
     }
 
     const onFinishEdit = (values) => {
-        console.log(values)
+        setLoading(true)
+        setEditTransactionFailed(false)
+        setEditTransaction(false)
+        values.date = allTransactions[selectedIndex].month
+        HTTPClient.Post(`${Endpoints.GET_ALL_BUDGET}/edit/${username}/transaction/${allTransactions[selectedIndex].id}`, values)
+            .then(data => {
+                console.log(data);
+                setEditTransaction(data.data.msg)
+                setLoading(false)
+                loadTransactions()
+
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+                setEditTransactionFailed(error.msg)
+            })
 
 
 
@@ -39,17 +116,80 @@ function AllTransactions() {
 
     const onChange = (date, dateString) => {
         console.log(date, dateString);
+        setMonth(dateString)
     }
 
     const onClickRemove = (index) => {
 
-        // setIndex(index)
+        setIndex(index)
         setIsDeleteModalVisible(true)
     }
     const handleDeleteOk = () => {
-        setIsDeleteModalVisible(false)
+        setLoading(true)
+        HTTPClient.Delete(`${Endpoints.GET_ALL_BUDGET}/delete/${username}/transaction/${allTransactions[selectedIndex].id}`)
+            .then(data => {
+                console.log(data);
+                setIsDeleteModalVisible(false)
+                setDeleteSuccess(data.data.msg)
+                setLoading(false)
+                loadTransactions()
+
+            }).catch(error => {
+                console.log(error.msg)
+                setDeleteFailed(error.msg)
+                setLoading(false)
+            })
+
 
     }
+
+    const loadTransactions = () => {
+        debugger
+        setLoading(true);
+        getOverAllAmount()
+
+        HTTPClient.Get(`${Endpoints.GET_ALL_BUDGET}/${username}?payment_type=transaction&&type=${selectedType}&&category=${selectedCategory}&&date=${month}`)
+            .then(data => {
+                console.log(data);
+                setAllTransactions(data.data.object)
+                setLoading(false)
+
+
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+                setAllTransactions([])
+
+            })
+
+        setTimeout(() => {
+            setAddTransactionFailed(false)
+            setAddTransaction(false)
+            form.resetFields();
+            setEditTransactionFailed(false)
+            setEditTransaction(false)
+            formEdit.resetFields();
+            setIsModalVisible(false)
+        }, 3000);
+    }
+
+    const getOverAllAmount = () => {
+        setLoading(true);
+
+        HTTPClient.Get(`${Endpoints.GET_ALL_BUDGET}/total/${username}/transaction/${month}`)
+            .then(data => {
+                console.log(data);
+                setOverallAmount(data.data.object)
+                setLoading(false)
+
+
+            }).catch(error => {
+                console.log(error.msg)
+                setLoading(false)
+
+            })
+    }
+
 
 
     const columns = [{
@@ -58,7 +198,7 @@ function AllTransactions() {
     },
     {
         Header: "Category",
-        accessor: "categoryName"
+        accessor: "category"
     },
     {
         Header: "Amount",
@@ -72,7 +212,7 @@ function AllTransactions() {
                 <div className='table-action-column' style={{ display: "block" }}>
                     <Button className='btn-table-edit' icon={<EditFilled color='#004ffc' />} onClick={() => {
                         console.log(row)
-                        showModal();
+                        showModal(row.index);
                     }}></Button>
                     <Button className='btn-table-delete' icon={<DeleteFilled />} onClick={() => onClickRemove(row.index)}></Button>
                 </div>
@@ -82,12 +222,13 @@ function AllTransactions() {
 
     return (
         <div >
+            {loading && <Loader />}
             <div className="nic-parent" >
                 <Row>
                     <Form
                         form={formMonth}
                         layout="inline"
-                        onFinish={onFinish}
+                        onFinish={loadTransactions}
                     >
                         <Form.Item
                             label="Month"
@@ -101,7 +242,25 @@ function AllTransactions() {
                             name="category"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <Select placeholder="Select a category"/>
+                            <Select placeholder="Select a category" onChange={(value) => setSelectedCategory(value)}>
+                                <Option value="all">All</Option>
+                                {validArray(allCategories) && allCategories.map((ctgry, index) => {
+                                    return (<Option value={ctgry.category_name}>{ctgry.category_name}</Option>)
+                                })}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item
+                            label="Transaction Type"
+                            name="type"
+                            rules={[{ required: true, message: 'Required Field' }]}
+                        >
+
+                            <Select placeholder="Transaction type" onChange={(value) => setSelectedType(value)}>
+                                <Option value="all">All</Option>
+                                <Option value="income">Income</Option>
+                                <Option value="expense">Expense</Option>
+
+                            </Select>
                         </Form.Item>
 
                         <Form.Item style={{ display: 'flex', justifyContent: 'end' }}>
@@ -113,14 +272,28 @@ function AllTransactions() {
                 </Row>
             </div>
 
-            <Row style={{ marginTop: "10px" }}>
+            {allTransactions && <Row style={{ marginTop: "10px" }}>
                 <Col sm={24} md={18} lg={14} xl={14}>
+                    <Row style={{ display: "flex", justifyContent: "space-between" }}>
+
+                        <Alert type='success' message={`Total Income ${overallAmount.totalIncome}`} />
+                        <Alert type='error' message={`Total Expense ${overallAmount.totalExpenses}`} />
+
+                    </Row>
                     <ReactTable
                         columns={columns}
-                        data={data}
+                        data={allTransactions}
                         defaultPageSize={5}
                         showPageSizeOptions={true}
                         style={{ marginTop: "5px" }}
+                        getTrProps={(state, rowInfo, column) => {
+                            console.log(rowInfo)
+                            return {
+                                style: {
+                                    background: rowInfo && rowInfo.original && rowInfo.original.type == "income" ? '#f6ffed' : rowInfo && rowInfo.original && rowInfo.original.type == "expense" ? '#fd000030' : ""
+                                }
+                            }
+                        }}
                     />
                 </Col>
                 <Col span={1}>
@@ -135,13 +308,13 @@ function AllTransactions() {
                     <Form
                         form={form}
                         layout="vertical"
-                        onFinish={onFinishEdit}
+                        onFinish={onFinish}
                         style={{ marginTop: "5px" }}
 
                     >
                         <Form.Item
                             label="Name"
-                            name="budgetName"
+                            name="name"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
                             <Input />
@@ -151,35 +324,47 @@ function AllTransactions() {
                             name="category"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <Select />
+
+                            <Select placeholder="Select a category" >
+                                {validArray(allCategories) && allCategories.map((ctgry, index) => {
+                                    return (<Option value={ctgry.category_name}>{ctgry.category_name}</Option>)
+                                })}
+                            </Select>
+
                         </Form.Item>
                         <Form.Item
                             label="Transaction Type"
-                            name="category"
+                            name="type"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <Select />
+                            <Select>
+
+                                <Option value="income">Income</Option>
+                                <Option value="expense">Expense</Option>
+                            </Select>
                         </Form.Item>
                         <Form.Item
                             label="Amount"
                             name="amount"
-                            rules={[{ required: true, message: 'Required Field' }]}
+                            rules={[{ required: true, message: 'Required Field' }, { pattern: /^\d+$/, message: "Invalid format" },{pattern: /^\d+$/, message: "Invalid format"}]}
                         >
-                            <Input />
+                            <Input accept='numeric' />
                         </Form.Item>
                         <Form.Item
                             label="Notes"
-                            name="amount"
+                            name="note"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
                             <Input.TextArea />
                         </Form.Item>
                         <Form.Item
                             label="Recurring"
-                            name="amount"
+                            name="recurring"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <Input />
+                            <Select placeholder="Select Recurring" >
+                                <Option value="monthly">Monthly</Option>
+                            </Select>
                         </Form.Item>
                         <Form.Item style={{ display: 'flex', justifyContent: 'end' }}>
                             <Button type="primary" htmlType="submit" className='go-button'>
@@ -187,14 +372,18 @@ function AllTransactions() {
                             </Button>
                         </Form.Item>
                     </Form>
+                    {addTransaction && <Alert type='success' message={addTransaction} />}
+                    {addTransactionFailed && <Alert type='error' message={addTransactionFailed} />}
                 </Col>
-            </Row>
+            </Row>}
             <ModalConfirm
                 title="Delet Message"
                 isModalVisible={isDeletModalVisible}
                 handleCancel={handleCancel}
                 handleOk={handleDeleteOk}
                 body={`Are you sure you want to remove this transaction`}
+                deleteSuccess={deleteSuccess}
+                deleteFailed={deleteFailed}
 
             />
             <EditTransaction
@@ -202,18 +391,14 @@ function AllTransactions() {
                 handleCancel={handleCancel}
                 onFinish={onFinishEdit}
                 formEdit={formEdit}
+                initialValues={editModalVsibile && allTransactions[selectedIndex]}
+                allCategories={allCategories}
+                editTransaction={editTransaction}
+                editTransactionFailed={editTransactionFailed}
+                isTranaction={true}
             />
         </div>
     );
 }
 
 export default AllTransactions;
-
-
-const data = [{
-    name: "Transaction 1",
-    categoryName: "Food",
-    amount: 100,
-    id: 1
-
-}]

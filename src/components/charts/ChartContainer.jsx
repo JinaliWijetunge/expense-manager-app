@@ -15,7 +15,8 @@ const ChartContainer = ({ chartData }) => {
 
                     <Col span={12} md={12} lg={12} xl={12}>
                         <div className="chart-title">
-                            <h4>Heading</h4>
+                            <h4>Overall 
+spending against overall budget</h4>
                         </div>
                         <div className="chart-container">
                             <PieChartView pieChartData={pieChartData} />
@@ -23,7 +24,7 @@ const ChartContainer = ({ chartData }) => {
                     </Col>
                     <Col span={12} md={12} lg={12} xl={12}>
                         <div className="chart-title">
-                            <h4>Heading</h4>
+                            <h4>Each category against the budget</h4>
                         </div>
                         <div className="chart-container">
                             <BarChartView barChartData={chartData} heading="Count" name="Heading" />

@@ -19,7 +19,9 @@ function AllCategories() {
     const [formEdit] = Form.useForm();
     const [editModalVsibile, setIsModalVisible] = useState(false);
     const [isDeletModalVisible, setIsDeleteModalVisible] = useState(false)
-    const [selestedIndex, setIndex] = useState()
+    const [selectedIndex, setIndex] = useState()
+    const [deleteSuccess, setDeleteSuccess] = useState()
+    const [deleteFailed, setDeleteFailed] = useState()
 
     useEffect(() => {
         //get all categories
@@ -61,11 +63,12 @@ function AllCategories() {
     };
 
     const handleCancel = () => {
-        setIsModalVisible(false);
+        setIsDeleteModalVisible(false);
     };
     const onFinish = (values) => {
         console.log(values)
-
+        setCreateCategoryFailed(false)
+        setCreateCategorySuccess(false)
         HTTPClient.Post(`${Endpoints.GET_ALL_CATEGORIES}/${username}`, values)
             .then(data => {
                 console.log(data);
@@ -87,18 +90,14 @@ function AllCategories() {
     },
     {
         Header: "Action",
-        accessor: "categoryName"
-    },
-    {
-        Header: "Action",
         accessor: "id",
         Cell: row => {
             return (
                 <div className='table-action-column' style={{ display: "block" }}>
-                    <Button className='btn-table-edit' icon={<EditFilled color='#004ffc' />} onClick={() => {
+                    {/* <Button className='btn-table-edit' icon={<EditFilled color='#004ffc' />} onClick={() => {
                         console.log(row)
                         showModal(row.index);
-                    }}></Button>
+                    }}></Button> */}
                     <Button className='btn-table-delete' icon={<DeleteFilled />} onClick={() => onClickRemove(row.index)}></Button>
                 </div>
             )
@@ -106,12 +105,26 @@ function AllCategories() {
     }]
 
     const onClickRemove = (index) => {
-
-        // setIndex(index)
+        setDeleteSuccess(false)
+        setDeleteFailed(false)
+        setIndex(index)
         setIsDeleteModalVisible(true)
     }
     const handleDeleteOk = () => {
-        setIsDeleteModalVisible(false)
+        setLoading(true)
+        HTTPClient.Delete(`${Endpoints.GET_ALL_CATEGORIES}/${allCategories[selectedIndex].category_name}`)
+            .then(data => {
+                console.log(data);
+                setIsDeleteModalVisible(false)
+                setDeleteSuccess(data.data.msg)
+                setLoading(false)
+                loadCategories()
+
+            }).catch(error => {
+                console.log(error.msg)
+                setDeleteFailed(error.msg)
+                setLoading(false)
+            })
 
     }
     const onFinishEdit = (values) => {
@@ -172,16 +185,18 @@ function AllCategories() {
                 isModalVisible={isDeletModalVisible}
                 handleCancel={handleCancel}
                 handleOk={handleDeleteOk}
-                body={`Are you sure you want to remove this transaction`}
+                body={`Are you sure you want to remove ${isDeletModalVisible && allCategories[selectedIndex].category_name} category`}
+                deleteSuccess={deleteSuccess}
+                deleteFailed={deleteFailed}
 
             />
-            <EditCategory
+            {/* <EditCategory
                 isModalVisible={editModalVsibile}
                 handleCancel={handleCancel}
                 onFinish={onFinishEdit}
                 formEdit={formEdit}
-                initialValues={allCategories[selestedIndex]}
-            />
+                initialValues={allCategories[selectedIndex]}
+            /> */}
         </div>
     );
 }
