@@ -8,10 +8,13 @@ import Endpoints from '../../services/Endpoints';
 import HTTPClient from '../../services/HTTPClient';
 import Loader from '../../components/loader/Loader';
 import { validArray } from '../../_helpers/utilityFunctions';
+import moment from 'moment';
 
 const { Option } = Select
 
 function AllTransactions() {
+    const day = moment().format("YYYY")
+    const monthVal = moment().format("MM")
     const [editModalVsibile, setIsModalVisible] = useState(false);
     const [isDeletModalVisible, setIsDeleteModalVisible] = useState(false)
     const [form] = Form.useForm();
@@ -19,9 +22,9 @@ function AllTransactions() {
     const [formEdit] = Form.useForm();
     const [username, setUsername] = useState(localStorage.username)
     const [loading, setLoading] = useState(false)
-    const [month, setMonth] = useState()
-    const [selectedCategory, setSelectedCategory] = useState()
-    const [selectedType, setSelectedType] = useState()
+    const [month, setMonth] = useState(`${day}-${monthVal}`)
+    const [selectedCategory, setSelectedCategory] = useState("all")
+    const [selectedType, setSelectedType] = useState("all")
     const [allCategories, setCategories] = useState([])
     const [allTransactions, setAllTransactions] = useState()
     const [addTransaction, setAddTransaction] = useState()
@@ -37,6 +40,7 @@ function AllTransactions() {
     useEffect(() => {
         //get all categories
         loadCategories()
+        loadTransactions()
 
     }, [])
 
@@ -201,7 +205,7 @@ function AllTransactions() {
         accessor: "category"
     },
     {
-        Header: "Amount",
+        Header: "Amount (LKR)",
         accessor: "amount"
     },
     {
@@ -220,6 +224,12 @@ function AllTransactions() {
         }
     }]
 
+    
+    function disabledDate(current) {
+        // Can not select days before today and today
+        return current && current > moment().endOf('day');
+    }
+
     return (
         <div >
             {loading && <Loader />}
@@ -229,13 +239,20 @@ function AllTransactions() {
                         form={formMonth}
                         layout="inline"
                         onFinish={loadTransactions}
+                        initialValues={
+                            {
+                                "category": selectedCategory,
+                                "month": moment(month),
+                                "type": selectedType
+                            }
+                        }
                     >
                         <Form.Item
                             label="Month"
                             name="month"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <DatePicker onChange={onChange} picker="month" placeholder="Select a month" />
+                            <DatePicker onChange={onChange} picker="month" placeholder="Select a month" disabledDate={disabledDate}/>
                         </Form.Item>
                         <Form.Item
                             label="Category"
@@ -276,8 +293,8 @@ function AllTransactions() {
                 <Col sm={24} md={18} lg={14} xl={14}>
                     <Row style={{ display: "flex", justifyContent: "space-between" }}>
 
-                        <Alert type='success' message={`Total Income ${overallAmount.totalIncome}`} />
-                        <Alert type='error' message={`Total Expense ${overallAmount.totalExpenses}`} />
+                        <Alert type='success' message={`Total Income LKR ${overallAmount.totalIncome}`} />
+                        <Alert type='error' message={`Total Expense LKR ${overallAmount.totalExpenses}`} />
 
                     </Row>
                     <ReactTable
@@ -344,7 +361,7 @@ function AllTransactions() {
                             </Select>
                         </Form.Item>
                         <Form.Item
-                            label="Amount"
+                            label="Amount (LKR)"
                             name="amount"
                             rules={[{ required: true, message: 'Required Field' }, { pattern: /^\d+$/, message: "Invalid format" },{pattern: /^\d+$/, message: "Invalid format"}]}
                         >
@@ -353,14 +370,14 @@ function AllTransactions() {
                         <Form.Item
                             label="Notes"
                             name="note"
-                            rules={[{ required: true, message: 'Required Field' }]}
+                            // rules={[{ required: true, message: 'Required Field' }]}
                         >
                             <Input.TextArea />
                         </Form.Item>
                         <Form.Item
                             label="Recurring"
                             name="recurring"
-                            rules={[{ required: true, message: 'Required Field' }]}
+                            // rules={[{ required: true, message: 'Required Field' }]}
                         >
                             <Select placeholder="Select Recurring" >
                                 <Option value="monthly">Monthly</Option>

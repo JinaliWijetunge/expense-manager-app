@@ -53,7 +53,7 @@ const EditTransaction = ({ title, allCategories, isModalVisible, handleCancel, o
                     </Select>
                 </Form.Item>}
                 <Form.Item
-                    label="Amount"
+                    label="Amount (LKR)"
                     name="amount"
                     rules={[{ required: true, message: 'Required Field' },{pattern: /^\d+$/, message: "Invalid format"}]}
                 >
@@ -62,14 +62,14 @@ const EditTransaction = ({ title, allCategories, isModalVisible, handleCancel, o
                 <Form.Item
                     label="Notes"
                     name="note"
-                    rules={[{ required: true, message: 'Required Field' }]}
+                    // rules={[{ required: true, message: 'Required Field' }]}
                 >
                     <Input.TextArea />
                 </Form.Item>
                 <Form.Item
                     label="Recurring"
                     name="recurring"
-                    rules={[{ required: true, message: 'Required Field' }]}
+                    // rules={[{ required: true, message: 'Required Field' }]}
                 >
                     <Select placeholder="Select Recurring" >
                         <Option value="monthly">Monthly</Option>

@@ -25,7 +25,7 @@ const TabView = () => {
     
           <Tabs onChange={callback} type="card" activeKey={activeKey[1]} >
             <TabPane tab="Overview" key="" className={window.location.pathname.includes("") ? "ant-tabs-tab-active" : "ant-tabs-tab"}></TabPane>
-            <TabPane tab="Tranactions" key="transactions" className={window.location.pathname.includes("transactions") ? "ant-tabs-tab-active" : "ant-tabs-tab"}></TabPane>
+            <TabPane tab="Transactions" key="transactions" className={window.location.pathname.includes("transactions") ? "ant-tabs-tab-active" : "ant-tabs-tab"}></TabPane>
             <TabPane tab="Budget" key="budget" className={window.location.pathname.includes("budget") ? "ant-tabs-tab-active" : "ant-tabs-tab"}></TabPane>
             <TabPane tab="Categories" key="categories" className={window.location.pathname.includes("categories") ? "ant-tabs-tab-active" : "ant-tabs-tab"}></TabPane>
           </Tabs>

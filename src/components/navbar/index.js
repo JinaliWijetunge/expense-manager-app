@@ -61,7 +61,7 @@ const Form = props => {
             </div>
             <Dropdown overlay={menu}>
               <Button>
-               Name <CaretDownOutlined />
+               {localStorage.username} <CaretDownOutlined />
               </Button>
             </Dropdown>
 

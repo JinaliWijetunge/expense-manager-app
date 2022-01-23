@@ -8,10 +8,13 @@ import { validArray } from '../../_helpers/utilityFunctions';
 import { DeleteFilled, EditFilled } from '@ant-design/icons';
 import ModalConfirm from '../../components/modals/ModalConfirm';
 import EditTransaction from '../../components/modals/EditTransaction';
+import moment from 'moment';
 
 const { Option } = Select
 
 function AllBudget() {
+    const day = moment().format("YYYY")
+    const monthVal = moment().format("MM")
     const [editModalVsibile, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
     const [formEdit] = Form.useForm();
@@ -22,8 +25,8 @@ function AllBudget() {
     const [allCategories, setCategories] = useState([])
     const [addBudget, setAddBudget] = useState()
     const [addBudgetFailed, setAddBudgetFailed] = useState()
-    const [month, setMonth] = useState()
-    const [selectedCategory, setSelectedCategory] = useState()
+    const [month, setMonth] = useState(`${day}-${monthVal}`)
+    const [selectedCategory, setSelectedCategory] = useState("All")
     const [isDeletModalVisible, setIsDeleteModalVisible] = useState(false)
     const [selectedIndex, setIndex] = useState()
     const [deleteSuccess, setDeleteSuccess] = useState()
@@ -35,6 +38,7 @@ function AllBudget() {
     useEffect(() => {
         //get all categories
         loadCategories()
+        loadBudget()
 
     }, [])
 
@@ -178,7 +182,7 @@ function AllBudget() {
         accessor: "name"
     },
     {
-        Header: "Amount",
+        Header: "Amount (LKR)",
         accessor: "amount"
     },
     {
@@ -201,6 +205,11 @@ function AllBudget() {
         }
     }]
 
+    function disabledDate(current) {
+        // Can not select days before today and today
+        return current && current > moment().endOf('day');
+    }
+
     return (
         <div >
             {loading && <Loader />}
@@ -210,13 +219,19 @@ function AllBudget() {
                         form={formMonth}
                         layout="inline"
                         onFinish={loadBudget}
+                        initialValues={
+                            {
+                                "category": selectedCategory,
+                                "month": moment(month)
+                            }
+                        }
                     >
                         <Form.Item
                             label="Month"
                             name="month"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <DatePicker onChange={onChange} picker="month" placeholder="Select a month" />
+                            <DatePicker onChange={onChange} picker="month" placeholder="Select a month" disabledDate= {disabledDate}/>
                         </Form.Item>
                         <Form.Item
                             label="Category"
@@ -295,7 +310,7 @@ function AllBudget() {
 
                         </Form.Item>
                         <Form.Item
-                            label="Amount"
+                            label="Amount (LKR)"
                             name="amount"
                             rules={[{ required: true, message: 'Required Field' }, { pattern: /^\d+$/, message: "Invalid format" }]}
                         >
@@ -304,14 +319,14 @@ function AllBudget() {
                         <Form.Item
                             label="Notes"
                             name="note"
-                            rules={[{ required: true, message: 'Required Field' }]}
+                        // rules={[{ required: true, message: 'Required Field' }]}
                         >
                             <Input.TextArea />
                         </Form.Item>
                         <Form.Item
                             label="Recurring"
                             name="recurring"
-                            rules={[{ required: true, message: 'Required Field' }]}
+                        // rules={[{ required: true, message: 'Required Field' }]}
                         >
                             <Select placeholder="Select Recurring" >
                                 <Option value="monthly">Monthly</Option>
@@ -334,6 +349,8 @@ function AllBudget() {
                 handleCancel={handleCancel}
                 handleOk={handleDeleteOk}
                 body={`Are you sure you want to remove this budget`}
+                deleteSuccess={deleteSuccess}
+                deleteFailed={deleteFailed}
 
             />
             <EditTransaction

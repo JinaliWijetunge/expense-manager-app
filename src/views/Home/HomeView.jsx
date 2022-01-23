@@ -40,6 +40,11 @@ function HomeView() {
       })
 
   }
+  
+  function disabledDate(current) {
+    // Can not select days before today and today
+    return current && current > moment().endOf('day');
+}
 
   return (
     <div>
@@ -49,6 +54,7 @@ function HomeView() {
           picker="month"
           onChange={onChange}
           defaultValue={moment()}
+          disabledDate={disabledDate}
         />
       </div>
       <div style={{ marginTop: "10px" }}>
