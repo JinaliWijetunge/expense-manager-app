@@ -6,7 +6,7 @@ const ModalConfirm = ({ title, body,isModalVisible, handleCancel,handleOk, delet
         <Modal title={title} visible={isModalVisible} onCancel={handleCancel}
             footer={[
                 <div>
-                    <Button className='modal-confirm' type='text' onClick={handleOk}> Confirm</Button>
+                    <Button className='modal-confirm' type='text' onClick={handleOk} disabled={deleteFailed}> Confirm</Button>
                     <Divider type="vertical" />
                     <Button className='modal-cancel' type='text' onClick={handleCancel}> Cancel</Button>
                 </div>

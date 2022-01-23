@@ -231,7 +231,7 @@ function AllBudget() {
                             name="month"
                             rules={[{ required: true, message: 'Required Field' }]}
                         >
-                            <DatePicker onChange={onChange} picker="month" placeholder="Select a month" disabledDate= {disabledDate}/>
+                            <DatePicker onChange={onChange} picker="month" placeholder="Select a month" disabledDate={disabledDate} />
                         </Form.Item>
                         <Form.Item
                             label="Category"
@@ -294,10 +294,12 @@ function AllBudget() {
                                 { required: true, message: 'Required Field' },
                                 ({ getFieldValue }) => ({
                                     validator(_, value) {
-                                        if (allBudget.find(x => x.category !== value)) {
-                                            return Promise.resolve();
+                                        console.log("adll", allBudget)
+                                        if (allBudget.find(x => x.category == value)) {
+                                            return Promise.reject(new Error('A Budget already exists for the selected category!'));
                                         }
-                                        return Promise.reject(new Error('A Budget already exists for the selected category!'));
+
+                                        return Promise.resolve();
                                     }
                                 })]}
                         >
