@@ -353,7 +353,7 @@ function AllBudget() {
                 </Col>
             </Row>}
             <ModalConfirm
-                title="Delet Message"
+                title="Delete Message"
                 isModalVisible={isDeletModalVisible}
                 handleCancel={handleCancel}
                 handleOk={handleDeleteOk}

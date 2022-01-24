@@ -36,7 +36,7 @@ function AllCategories() {
         HTTPClient.Get(`${Endpoints.GET_ALL_CATEGORIES}/${username}`)
             .then(data => {
                 console.log(data);
-                setCategories([...allCategories,...data.data.object])
+                setCategories([...presetCategories,...data.data.object])
                 setLoading(false)
 
 
@@ -194,7 +194,7 @@ function AllCategories() {
                 </Col>
             </Row>
             <ModalConfirm
-                title="Delet Message"
+                title="Delete Message"
                 isModalVisible={isDeletModalVisible}
                 handleCancel={handleCancel}
                 handleOk={handleDeleteOk}

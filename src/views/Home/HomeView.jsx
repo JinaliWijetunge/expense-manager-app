@@ -47,10 +47,10 @@ function HomeView() {
   const getOverAllAmount = () => {
     setLoading(true);
 
-    HTTPClient.Get(`${Endpoints.GET_ALL_BUDGET}/total/${username}/transaction/${dateMonth}`)
+    HTTPClient.Get(`${Endpoints.GET_ALL_BUDGET}/piechart/${username}/${dateMonth}`)
         .then(data => {
             console.log(data);
-            let array = [{name:"Incomes", value: data.data.object.totalIncome}, {name: "Expenses", value: data.data.object.totalExpenses}]
+            let array = [{name:"Total Budget", value: data.data.object.totalBudget}, {name: "Total Expenses", value: data.data.object.totalExpense}]
             setOverallAmount(array)
             setLoading(false)
 
